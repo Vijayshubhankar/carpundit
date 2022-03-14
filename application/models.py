@@ -1,6 +1,6 @@
 from application.app import app, db
 from datetime import date
-from sqlalchemy import ARRAY
+# from sqlalchemy import ARRAY
 """
 - Table 3 : Users (No relationships in table 3)
   - Full Name : string
@@ -86,7 +86,6 @@ class Question(db.Model):
     created_at = db.Column(db.Date, default=date.today())
 
 
-
 """
 - Table 4: Quiz
   - QuizID : int auto-increment
@@ -100,7 +99,7 @@ Q1 U1
 Q2 U1
 Q3 U2
 
-Ex: Seperate Option table
+Ex: Separate Option table
 
 Question1 [O1, O2, O3, O4] 
 Q2        [O1, O2, O3]
@@ -110,7 +109,7 @@ Table User Options
 - quiz_id
 - question_id
 - option
-"""
+
 
 Quiz Question  UserAnswer
 
@@ -119,6 +118,8 @@ quiz.user_answer
 
 # UserAnswer.query(quiz_id=2)
 
+"""
+
 
 class UserAnswer(db.Model):
     answer_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -126,24 +127,23 @@ class UserAnswer(db.Model):
     question_id = db.Column('question_id', db.Integer, db.ForeignKey('question.question_id'), nullable=False)
     option = db.Column(db.String(64), nullable=False)
 
+
 class Quiz(db.Model):
-    # 1 quiz only be take n by 1 user
+    # 1 quiz only be taken by 1 user
     quiz_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column('user_id', db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     # 1 quiz taken by 1 user can have multiple questions
-    # the same question can be answerrd by a differnet user in a differnt quiz
+    # the same question can be answered by a different user in a different quiz
     # Quiz1 - User1  - Q1,Q2,Q3...
     # Quiz2 - User2  - Q1,Q2,Q3...
     # Quiz3 - User1  - Q1,Q2,Q3...
     user_answer = db.relationship('Question', secondary=UserAnswer, lazy='subquery', backref=db.backref('Question', lazy=True))
-    """"""
-    submit_clicked =
-    car_recommendation =
+    sub_click = db.Column('sub_click', db.Boolean, nullable=False)
+    car_rec = db.Column('car_rec', db.Integer, db.ForeignKey('car.car_id'), nullable=False)
     quiz_time = db.Column(db.Date, default=date.today())
 
-
-
 # create all tables and initialize app
+
 
 db.create_all()
 db.init_app(app)
