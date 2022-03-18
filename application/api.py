@@ -1,6 +1,6 @@
 from application.app import app, db
 from flask import request
-from application.models import User, Car, Question, UserAnswer, Quiz
+from application.models import User, Car, Question, Quiz, UserAnswer
 
 # Import your models here
 from application.models import User
@@ -28,8 +28,8 @@ def home():
 # |update question| Question   | PUT         | /questions/id | 200      | 400   | question id |
 # |delete question| Question   | DELETE      | /questions/id | 200      | 400   | question id |
 # |get question   | Question   | GET         | /questions/id | 200      | 400   | question id |
-# |start quiz     | Quiz       | POST        | /quiz         | 200      | 400   | user id |
-# |end quiz       | Quiz       | POST        | /quiz/id      | 200      | 400   | quiz id | car recommen |
+# |start quiz     | Quiz       | POST        | /quiz/user_id         | 200      | 400   | user id | # user_id is not required in URL
+# |end quiz       | Quiz       | PUT        | /quiz/id      | 200      | 400   | quiz id | car recommen |
 
 
 @app.route("/cars", methods=["POST"])
@@ -45,7 +45,7 @@ def add_car():
 
 @app.route("/cars/<int:car_id>", methods=["GET"])
 def get_car(car_id):
-    car = Car.query.get("car_id")
+    car = Car.query.get(car_id)
     return {"name": car.car_name, "manufacturer": car.car_manufacturer, "launch_year": car.car_launch_year,
             "type": car.car_type, "mileage": car.car_mileage, "variant": car.car_variant, "price": car.car_price}
 
@@ -53,7 +53,7 @@ def get_car(car_id):
 @app.route("/cars/<int:car_id>", methods=["PUT"])
 def update_car(car_id):
     params = request.json
-    car = Car.query.get("car_id")
+    car = Car.query.get(car_id)
     car.car_name = params["name"]
     car.car_manufacturer = params["manufacturer"]
     car.car_launch_year = params["launch_year"]
@@ -68,7 +68,7 @@ def update_car(car_id):
 
 @app.route("/cars/<int:car_id>", methods=["DELETE"])
 def delete_car(car_id):
-    car = Car.query.get("car_id")
+    car = Car.query.get(car_id)
     db.session.delete(car)
     db.session.commit()
     return {"Status": "Success", "message": "Car Deleted"}
@@ -86,7 +86,7 @@ def add_question():
 @app.route("/questions/<int:question_id>", methods=["PUT"])
 def update_question(question_id):
     params = request.json
-    question = Question.query.get("question_id")
+    question = Question.query.get(question_id)
     question.question = params["question"]
     question.options = params["options"]
     db.session.add(question)
@@ -96,7 +96,7 @@ def update_question(question_id):
 
 @app.route("/questions/<int:question_id>", methods=["DELETE"])
 def delete_question(question_id):
-    question = Question.query.get("question_id")
+    question = Question.query.get(question_id)
     db.session.delete(question)
     db.session.commit()
     return {"Status": "Success", "message": "Question Deleted"}
@@ -104,15 +104,38 @@ def delete_question(question_id):
 
 @app.route("/questions/<int:question_id>", methods=["GET"])
 def get_question(question_id):
-    question = Question.query.get("question_id")
+    question = Question.query.get(question_id)
     return {"id": question.question_id, "question": question.question, "options": question.options}
 
 
-
+@app.route("/quiz", methods=["POST"])
 def start_quiz():
-    pass
+    params = request.json
+    quiz = Quiz(user_id=params["user_id"], sub_click=False)
+    db.session.add(quiz)
+    db.session.commit()
+    return {"quiz_id": quiz.quiz_id}
 
 
+@app.route("/quiz/<int:quiz_id>", methods=["PUT"])
+def end_quiz(quiz_id):
+    # {"user_answers":[{"8","City"},
+    #                 {"8","All"},
+    #                 {"8","SUV"},
+    #                 {"8","3"}]
+    # }
+    params = request.json
+    quiz = Quiz.query.get(quiz_id)
+    #for answer in params["user_answers"]:
+    for question_id, answer in params["user_answers"].items():
+        UserAnswer(quiz_id, question_id, answer)
+    quiz.sub_click = True
+    db.session.add(quiz)
+    db.session.commit()
+    return {"car_rec": quiz.car_rec}
 
-def
+"""
+Redo the API to handle the datastructure {user_answer” : [{“questiion_id”: 1, “option”: “SUV”}]}
+
+"""
 

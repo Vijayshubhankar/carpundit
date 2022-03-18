@@ -1,5 +1,5 @@
 from application.app import app, db
-from datetime import date
+from datetime import date, datetime
 from sqlalchemy import ARRAY
 """
 - Table 3 : Users (No relationships in table 3)
@@ -54,12 +54,12 @@ class Car(db.Model):
     car_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     car_name = db.Column(db.String(50), nullable=False)
     car_manufacturer = db.Column(db.String(50), nullable=False)
-    car_launch_year = db.Column(db.Date, nullable=False)
+    car_launch_year = db.Column(db.Integer, nullable=False)
     car_type = db.Column(db.String(10), nullable=False)
     car_mileage = db.Column(db.Float, nullable=False)
     car_variant = db.Column(db.String(50), nullable=False)
     car_price = db.Column(db.Float, nullable=False)
-    created_at = db.Column(db.Date, default=date.today())
+    created_at = db.Column(db.Date, default=date.today)
 
 """
 - Table 2 : Questions (No relationships in table 2)
@@ -83,7 +83,11 @@ class Question(db.Model):
     question_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     question = db.Column(db.String(1200), nullable=False)
     options = db.Column(db.ARRAY(db.String), nullable=False)
-    created_at = db.Column(db.Date, default=date.today())
+    created_at = db.Column(db.Date, default=date.today)
+
+"""
+Update the design with a different table for Answer Options, so that, saving data in user_answer table would be simpler.
+"""
 
 
 """
@@ -127,6 +131,13 @@ class UserAnswer(db.Model):
     question_id = db.Column('question_id', db.Integer, db.ForeignKey('question.question_id'), nullable=False)
     option = db.Column(db.String(64), nullable=False)
 
+# user_answer = db.Table('user_answer',
+#     db.Column('quiz_id', db.Integer, db.ForeignKey('quiz.quiz_id'), nullable=False),
+#     db.Column('question_id', db.Integer, db.ForeignKey('question.question_id'), nullable=False),
+#     #db.Column('answer_id', db.Integer, primary_key=True, autoincrement=True),
+#     db.Column('option', db.String(64), nullable=False)
+# )
+
 
 class Quiz(db.Model):
     # 1 quiz only be taken by 1 user
@@ -137,10 +148,11 @@ class Quiz(db.Model):
     # Quiz1 - User1  - Q1,Q2,Q3...
     # Quiz2 - User2  - Q1,Q2,Q3...
     # Quiz3 - User1  - Q1,Q2,Q3...
-    user_answer = db.relationship('Question', secondary=UserAnswer, lazy='subquery', backref=db.backref('Question', lazy=True))
+    #user_answer = db.relationship('Question', secondary=user_answer, lazy='subquery', backref=db.backref('Question', lazy=True))
+    user_answer = db.relationship("UserAnswer", back_populates="quiz_id")
     sub_click = db.Column('sub_click', db.Boolean, nullable=False)
-    car_rec = db.Column('car_rec', db.Integer, db.ForeignKey('car.car_id'), nullable=False)
-    quiz_time = db.Column(db.Date, default=date.today())
+    car_rec = db.Column('car_rec', db.Integer, db.ForeignKey('car.car_id'))
+    quiz_time = db.Column(db.DateTime, default=datetime.now)
 
 # create all tables and initialize app
 
