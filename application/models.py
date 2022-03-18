@@ -1,6 +1,6 @@
 from application.app import app, db
 from datetime import date
-# from sqlalchemy import ARRAY
+from sqlalchemy import ARRAY
 """
 - Table 3 : Users (No relationships in table 3)
   - Full Name : string
@@ -54,7 +54,7 @@ class Car(db.Model):
     car_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     car_name = db.Column(db.String(50), nullable=False)
     car_manufacturer = db.Column(db.String(50), nullable=False)
-    car_launch_year = db.Column(db.Year, nullable=False)
+    car_launch_year = db.Column(db.Date, nullable=False)
     car_type = db.Column(db.String(10), nullable=False)
     car_mileage = db.Column(db.Float, nullable=False)
     car_variant = db.Column(db.String(50), nullable=False)
